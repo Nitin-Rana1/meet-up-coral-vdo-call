@@ -38,7 +38,7 @@ const VideoChat = () => {
       const conn = new RTCPeerConnection(servers);
       const localStream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: false,
+        audio: true,
       });
       localVideoRef.current!.srcObject = localStream;
       setRemoteStream(new MediaStream());
