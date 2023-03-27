@@ -60,12 +60,6 @@ const VideoChat = () => {
           remoteStream?.addTrack(track);
         });
       };
-      const callDoc = doc(collection(db, "calls"));
-      const offerCandidates = collection(callDoc, "offerCandidates");
-      // Get candidates for caller, save to db
-      pc!.onicecandidate = (event) => {
-        event.candidate && addDoc(offerCandidates, event.candidate?.toJSON());
-      };
     }
   }, [pc]);
   //createRoom
@@ -83,6 +77,13 @@ const VideoChat = () => {
       offer,
       answer: null,
     });
+    //offercandidates
+    const offerCandidates = collection(callDoc, "offerCandidates");
+    // Get candidates for caller, save to db
+    pc!.onicecandidate = (event) => {
+      event.candidate && addDoc(offerCandidates, event.candidate?.toJSON());
+    };
+
     const answerCandidates = collection(callDoc, "answerCandidates");
 
     // Listen for remote answer
