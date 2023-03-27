@@ -67,7 +67,6 @@ const VideoChat = () => {
     console.log("creating room");
     // Create offer
     const offerDescription = await pc!.createOffer();
-    await pc!.setLocalDescription(offerDescription);
     const offer = {
       sdp: offerDescription.sdp,
       type: offerDescription.type,
@@ -83,6 +82,7 @@ const VideoChat = () => {
     pc!.onicecandidate = (event) => {
       event.candidate && addDoc(offerCandidates, event.candidate?.toJSON());
     };
+    await pc!.setLocalDescription(offerDescription);
 
     const answerCandidates = collection(callDoc, "answerCandidates");
 
