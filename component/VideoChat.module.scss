@@ -1,8 +1,28 @@
 .main {
-  .localVdo,
+  display: grid;
+  justify-content: center;
+  max-width: 960px;
+  margin: 10px auto;
+  .localVdo {
+    height: 25vh;
+    width: 25vh;
+  }
+  .remoteVdoWrapper {
+  }
   .remoteVdo {
-    height: 50vh;
-    width: 50vh;
+    height: 65vh;
+    width: 100%;
     border: 2px solid gray;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+  .form {
+    display: flex;
+    justify-content: space-around;
+    section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   }
 }
