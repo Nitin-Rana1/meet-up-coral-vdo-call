@@ -27,20 +27,20 @@ const servers = {
   ],
   iceCandidatePoolSize: 10,
 };
-const VideoChat = () => {
+export default function RandVideoChat() {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-
-  // Global State
   const [pc, setPc] = useState<RTCPeerConnection | null>(null);
-  if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
-  //initial
+  if (remoteVideoRef.current) {
+    console.log("remoVdo");
+    remoteVideoRef.current.srcObject = remoteStream;
+  }
   async function init() {
     const conn = new RTCPeerConnection(servers);
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: true,
+      audio: false,
     });
     localVideoRef.current!.srcObject = localStream;
     setRemoteStream(new MediaStream());
@@ -72,8 +72,7 @@ const VideoChat = () => {
       pc.addEventListener("iceconnectionstatechange", () => {
         console.log("ICE connection state:", pc.iceConnectionState);
         if (pc.iceConnectionState === "disconnected") {
-          init();
-          connect();
+          reconnect();
         }
       });
     } else console.log("not pcxxxxlost con ");
@@ -81,7 +80,8 @@ const VideoChat = () => {
 
   //createRoom
   async function createRoom() {
-    console.log("creating room");
+    if (pc) console.log("PC creating room");
+    else console.log("creating room");
     // Create offer
     const offerDescription = await pc!.createOffer();
     const offer = {
@@ -95,8 +95,13 @@ const VideoChat = () => {
     });
     //offercandidates
     const offerCandidates = collection(callDoc, "offerCandidates");
+    const oc = collection(callDoc, "TOP G");
+
     // Get candidates for caller, save to db
     pc!.onicecandidate = (event) => {
+      console.log("In under onICEcandidate");
+      if (!event.candidate) console.log("EVENT hi ni hai");
+      else console.log("Event !!!");
       event.candidate && addDoc(offerCandidates, event.candidate?.toJSON());
     };
     await pc!.setLocalDescription(offerDescription);
@@ -165,18 +170,29 @@ const VideoChat = () => {
     }
   };
   const reconnect = async () => {
-    const conn = new RTCPeerConnection(servers);
+    // Get an array of RTCRtpSender objects
+    const senders = pc!.getSenders();
+
+    // Loop through the senders and replace the track with null
+    senders.forEach((sender) => {
+      const track = sender.track;
+      if (track) {
+        sender
+          .replaceTrack(null)
+          .then(() => console.log(`Track removed from sender `))
+          .catch((err) => console.error(`Error removing track from sender `));
+      }
+    });
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false,
     });
     localVideoRef.current!.srcObject = localStream;
     setRemoteStream(new MediaStream());
-    // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
-      conn.addTrack(track, localStream);
+      pc!.addTrack(track, localStream);
     });
-    setPc(conn);
+    connect();
   };
   return (
     <main className={styles.main}>
@@ -198,84 +214,13 @@ const VideoChat = () => {
         />
         <section>
           <Button onClick={connect} variant="contained">
-            Connect
+            Connect HEART
           </Button>
           <Button onClick={reconnect} variant="contained">
-            Skip
+            REConnect
           </Button>
         </section>
       </div>
     </main>
   );
-};
-
-export default VideoChat;
-
-// async function createRoom() {
-//   // Reference Firestore collections for signaling
-//   const callDoc = doc(collection(db, "calls"));
-
-//   const answerCandidates = collection(callDoc, "answerCandidates");
-
-//   setRoomLink(callDoc.id);
-
-//   // Create offer
-//   const offerDescription = await pc!.createOffer();
-//   await pc!.setLocalDescription(offerDescription);
-//   const offer = {
-//     sdp: offerDescription.sdp,
-//     type: offerDescription.type,
-//   };
-
-//   setDoc(callDoc, { offer });
-
-//   // Listen for remote answer
-//   onSnapshot(callDoc, (snapshot) => {
-//     const data = snapshot.data();
-//     if (!pc!.currentRemoteDescription && data?.answer) {
-//       const answerDescription = new RTCSessionDescription(data.answer);
-//       pc!.setRemoteDescription(answerDescription);
-//     }
-//   });
-
-//   // When answered, add candidate to peer connection
-//   onSnapshot(answerCandidates, (snapshot) => {
-//     snapshot.docChanges().forEach((change) => {
-//       if (change.type === "added") {
-//         const candidate = new RTCIceCandidate(change.doc.data());
-//         pc!.addIceCandidate(candidate);
-//       }
-//     });
-//   });
-// }
-// async function joinRoom() {
-//   const callDoc = doc(db, "calls", joinLink);
-//   const offerCandidates = collection(callDoc, "offerCandidates");
-//   const answerCandidates = collection(callDoc, "answerCandidates");
-//   pc!.onicecandidate = (event) => {
-//     event.candidate && addDoc(answerCandidates, event.candidate?.toJSON());
-//   };
-
-//   const callData = (await getDoc(callDoc)).data();
-
-//   const offerDescription = callData && callData.offer;
-//   await pc!.setRemoteDescription(new RTCSessionDescription(offerDescription));
-//   const answerDescription = await pc!.createAnswer();
-//   await pc!.setLocalDescription(answerDescription);
-//   const answer = {
-//     type: answerDescription.type,
-//     sdp: answerDescription.sdp,
-//   };
-//   await updateDoc(callDoc, {
-//     answer,
-//   });
-
-//   onSnapshot(offerCandidates, (snapshot) => {
-//     snapshot.docChanges().forEach((change) => {
-//       if (change.type === "added") {
-//         let data = change.doc.data();
-//         pc!.addIceCandidate(new RTCIceCandidate(data));
-//       }
-//     });
-//   });
-// }
+}

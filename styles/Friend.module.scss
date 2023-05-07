@@ -1,0 +1,26 @@
+.container {
+  padding: 0;
+  display: grid;
+  .videos {
+    padding: 0;
+    // background-color: red;
+    position: relative;
+    .remoteVideo {
+      width: 100vw;
+      height: 100vh;
+      background-color: gray;
+    }
+    .localVideo {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      z-index: 2;
+      width: 20vw;
+      height: 20vh;
+      background-color: none;
+    }
+  }
+}
+.Menu {
+  display: flex;
+}
