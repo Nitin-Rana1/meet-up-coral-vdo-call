@@ -38,6 +38,8 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { list } from "firebase/storage";
+import { WhatsappShareButton } from "react-share";
+
 const servers = {
   iceServers: [
     {
@@ -296,6 +298,17 @@ function BottomSlider({
         <Typography variant="body1" align="center" gutterBottom>
           Your Room Link : {createdLink == "" ? "Create a link!" : createdLink}
         </Typography>
+        <Button
+          variant="text"
+          onClick={() =>
+            navigator.share({
+              text: createdLink,
+              title: "Connect with me on Video chat",
+            })
+          }
+        >
+          Share it!
+        </Button>
         <Button
           variant="contained"
           color="primary"
