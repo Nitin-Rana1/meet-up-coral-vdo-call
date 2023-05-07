@@ -263,8 +263,8 @@ function BottomSlider({
           Join or Create a Room
         </Typography>
         <DialogContentText>
-          Please enter a room link to join or click "Create Room" to generate a
-          new link.
+          Please enter a room link to join or click &quot;Create Room&quot; to
+          generate a new link.
         </DialogContentText>
 
         <TextField
