@@ -12,6 +12,11 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import styles from "../styles/Friend.module.scss";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -41,14 +46,17 @@ const servers = {
   ],
   iceCandidatePoolSize: 10,
 };
-export default function friend() {
+export default function Friend() {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [pc, setPc] = useState<RTCPeerConnection | null>(null);
   const [createdLink, setCreatedLink] = useState("");
   const [joiningLink, setJoiningLink] = useState("");
-  const [bottomPopUp, setBottomPopUp] = useState(true);
+  const [bottomPopUp, setBottomPopUp] = useState(false);
+  useEffect(() => {
+    setBottomPopUp(true);
+  }, []);
   useEffect(() => {
     if (remoteVideoRef.current) {
       console.log("remoVdo");
@@ -234,27 +242,33 @@ function BottomSlider({
 
       setBottomPopUp(open);
     };
-
+  const [invalidJoiningLink, setInvalidJoiningLink] = useState(false);
   const list = () => (
     <Box
-      sx={{ width: "auto" }}
+      sx={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        padding: "2vw",
+        borderRadius: "2vw 2vw 0 0",
+        backgroundColor: "#fff",
+        boxShadow: "0px -4px 12px rgba(0, 0, 0, 0.25)",
+        zIndex: 9999,
+      }}
       role="presentation"
-      //   onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
     >
-      <div className={styles.links}>
+      <section>
+        <Typography variant="h6" align="center" gutterBottom>
+          Join or Create a Room
+        </Typography>
+        <DialogContentText>
+          Please enter a room link to join or click "Create Room" to generate a
+          new link.
+        </DialogContentText>
+
         <TextField
-          label="Link to share"
-          value={createdLink}
-          fullWidth
-          InputProps={{
-            readOnly: true,
-          }}
-          variant="outlined"
-          margin="normal"
-        />
-        <TextField
-          label="Link to join"
+          label="Paste Video Call Link"
           value={joiningLink}
           fullWidth
           onChange={(event) => setJoiningLink(event.target.value)}
@@ -264,24 +278,54 @@ function BottomSlider({
         <Button
           variant="contained"
           color="primary"
-          disabled={!pc}
-          onClick={createRoom}
+          onClick={() => {
+            if (joiningLink == "") {
+              setInvalidJoiningLink(true);
+            } else joinRoom(joiningLink);
+          }}
           fullWidth
-          className={styles.button}
-        >
-          Create Room
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          disabled={!pc || !joiningLink}
-          onClick={() => joinRoom(joiningLink)}
-          fullWidth
-          className={styles.button}
         >
           Join Room
         </Button>
-      </div>
+        <br />
+        <br />
+
+        <Typography variant="h6" align="center" gutterBottom>
+          Or
+        </Typography>
+        <Typography variant="body1" align="center" gutterBottom>
+          Your Room Link : {createdLink == "" ? "Create a link!" : createdLink}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={createRoom}
+          fullWidth
+          sx={{
+            marginTop: "1.5vw",
+            backgroundColor: "#1e88e5",
+            "&:hover": {
+              backgroundColor: "#1565c0",
+            },
+          }}
+        >
+          Create Room
+        </Button>
+        <Dialog
+          open={invalidJoiningLink}
+          onClose={() => setInvalidJoiningLink(false)}
+        >
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Please enter a valid room link to join the call.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
+          </DialogActions>
+        </Dialog>
+      </section>
     </Box>
   );
 
