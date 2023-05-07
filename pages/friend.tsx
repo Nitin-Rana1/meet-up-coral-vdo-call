@@ -303,10 +303,10 @@ function BottomSlider({
           fullWidth
           sx={{
             marginTop: "1.5vw",
-            backgroundColor: "#1e88e5",
-            "&:hover": {
-              backgroundColor: "#1565c0",
-            },
+            // backgroundColor: "#1e88e5",
+            // "&:hover": {
+            //   backgroundColor: "#1565c0",
+            // },
           }}
         >
           Create Room
