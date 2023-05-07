@@ -90,7 +90,7 @@ export default function Friend() {
         });
       };
     } else console.log("not pc ");
-  }, [pc]);
+  }, [pc, remoteStream]);
   //createRoom
   async function createRoom() {
     if (pc) console.log("PC creating room");
