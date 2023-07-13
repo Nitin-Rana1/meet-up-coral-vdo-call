@@ -185,7 +185,7 @@ export default function Friend() {
       });
     });
   }
-  const [myMicMuted, setMyMicMuted] = useState(true);
+  const [myMicMuted, setMyMicMuted] = useState(false);
   const [vdoOn, setVdoOn] = useState(true);
   const pauseVdo = () => {
     setVdoOn(false);
@@ -205,6 +205,22 @@ export default function Friend() {
     });
   };
 
+  const pauseMyAudio = () => {
+    setMyMicMuted(true);
+    const localStream = localVideoRef.current!.srcObject as MediaStream | null;
+    // Disable audio tracks
+    localStream!.getAudioTracks().forEach((track) => {
+      track.enabled = false;
+    });
+  };
+  const resumeMyAudio = () => {
+    setMyMicMuted(false);
+    const localStream = localVideoRef.current!.srcObject as MediaStream | null;
+    // Disable audio tracks
+    localStream!.getAudioTracks().forEach((track) => {
+      track.enabled = true;
+    });
+  };
   return (
     <Container className={styles.container}>
       <section className={styles.videos}>
@@ -212,14 +228,13 @@ export default function Friend() {
           ref={remoteVideoRef}
           className={styles.remoteVideo}
           playsInline
-          muted
           autoPlay
         />
         <video
           ref={localVideoRef}
           className={styles.localVideo}
           playsInline
-          muted={myMicMuted}
+          muted
           autoPlay
         />
         <article>
