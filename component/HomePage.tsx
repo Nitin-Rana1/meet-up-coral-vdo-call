@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <main>
       <Container style={{ width: "100vw", height: "100vh" }}>
-        <Typography variant="h3" align="center" gutterBottom>
+        <Typography variant="h3" marginTop={"2vh"} align="center" gutterBottom>
           Coral MeetUp
         </Typography>
         <div className={styles.logoWrapper}>
@@ -16,8 +16,6 @@ export default function HomePage() {
         <Typography variant="subtitle1" align="center" gutterBottom>
           Bringing People Closer Through Video Calls
         </Typography>
-        <br />
-        <br />
         <br />
         <br />
         <div

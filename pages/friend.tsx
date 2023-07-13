@@ -17,6 +17,9 @@ import {
   DialogContentText,
   DialogTitle,
   DialogActions,
+  Tabs,
+  Tab,
+  Link,
 } from "@mui/material";
 import styles from "../styles/Friend.module.scss";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -39,7 +42,14 @@ import {
 } from "firebase/firestore";
 import { list } from "firebase/storage";
 import { WhatsappShareButton } from "react-share";
-
+import {
+  Mic,
+  Duo,
+  CallEndRounded,
+  MicOffRounded,
+  VideocamOff,
+  Videocam,
+} from "@mui/icons-material";
 const servers = {
   iceServers: [
     {
@@ -175,26 +185,78 @@ export default function Friend() {
       });
     });
   }
+  const [myMicMuted, setMyMicMuted] = useState(true);
+  const [vdoOn, setVdoOn] = useState(true);
+  const pauseVdo = () => {
+    setVdoOn(false);
+    const localStream = localVideoRef.current!.srcObject as MediaStream | null;
+    const tracks = localStream!.getTracks();
+    tracks.forEach((track) => {
+      track.enabled = false;
+    });
+  };
+
+  const resumeVdo = () => {
+    setVdoOn(true);
+    const localStream = localVideoRef.current!.srcObject as MediaStream | null;
+    const tracks = localStream!.getTracks();
+    tracks.forEach((track) => {
+      track.enabled = true;
+    });
+  };
+
   return (
     <Container className={styles.container}>
-      {/* <Typography variant="h4" align="center" gutterBottom>
-        Connect with a friend
-      </Typography> */}
       <section className={styles.videos}>
-        {/* <div className={styles.videos}> */}
         <video
           ref={remoteVideoRef}
           className={styles.remoteVideo}
           playsInline
+          muted
           autoPlay
         />
         <video
           ref={localVideoRef}
           className={styles.localVideo}
           playsInline
-          muted
+          muted={myMicMuted}
           autoPlay
         />
+        <article>
+          <div>
+            {myMicMuted ? (
+              <Mic
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+                onClick={() => setMyMicMuted(!myMicMuted)}
+              />
+            ) : (
+              <MicOffRounded
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+                onClick={() => setMyMicMuted(!myMicMuted)}
+              />
+            )}
+            {vdoOn ? (
+              <VideocamOff
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+                onClick={pauseVdo}
+              />
+            ) : (
+              <Videocam
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+                onClick={resumeVdo}
+              />
+            )}
+            <Link href="/friend">
+              <CallEndRounded
+                sx={{
+                  color: "red",
+                  fontSize: 50,
+                  marginRight: "3vw",
+                }}
+              />
+            </Link>
+          </div>
+        </article>
       </section>
       <BottomSlider
         bottomPopUp={bottomPopUp}
@@ -245,6 +307,10 @@ function BottomSlider({
       setBottomPopUp(open);
     };
   const [invalidJoiningLink, setInvalidJoiningLink] = useState(false);
+  const [tabNo, setTabNo] = useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabNo(newValue);
+  };
   const list = () => (
     <Box
       sx={{
@@ -260,85 +326,95 @@ function BottomSlider({
       }}
       role="presentation"
     >
-      <section>
-        <Typography variant="h6" align="center" gutterBottom>
-          Join or Create a Room
-        </Typography>
-        <DialogContentText>
-          Please enter a room link to join or click &quot;Create Room&quot; to
-          generate a new link.
-        </DialogContentText>
-
-        <TextField
-          label="Paste Video Call Link"
-          value={joiningLink}
-          fullWidth
-          onChange={(event) => setJoiningLink(event.target.value)}
-          variant="outlined"
-          margin="normal"
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            if (joiningLink == "") {
-              setInvalidJoiningLink(true);
-            } else joinRoom(joiningLink);
-          }}
-          fullWidth
+      <Box sx={{ width: "100%", height: "37vh" }}>
+        <Tabs
+          value={tabNo}
+          onChange={handleChange}
+          aria-label="basic tabs example"
         >
-          Join Room
-        </Button>
-        <br />
-        <br />
-
-        <Typography variant="h6" align="center" gutterBottom>
-          Or
-        </Typography>
-        <Typography variant="body1" align="center" gutterBottom>
-          Your Room Link : {createdLink == "" ? "Create a link!" : createdLink}
-        </Typography>
-        <Button
-          variant="text"
-          onClick={() =>
-            navigator.share({
-              text: createdLink,
-              title: "Connect with me on Video chat",
-            })
-          }
-        >
-          Share it!
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={createRoom}
-          fullWidth
-          sx={{
-            marginTop: "1.5vw",
-            // backgroundColor: "#1e88e5",
-            // "&:hover": {
-            //   backgroundColor: "#1565c0",
-            // },
-          }}
-        >
-          Create Room
-        </Button>
-        <Dialog
-          open={invalidJoiningLink}
-          onClose={() => setInvalidJoiningLink(false)}
-        >
-          <DialogTitle>Error</DialogTitle>
-          <DialogContent>
-            <Typography>
-              Please enter a valid room link to join the call.
+          <Tab label="Join Room" onClick={() => setTabNo(0)} />
+          <Tab label="Create Room" onClick={() => setTabNo(1)} />
+        </Tabs>
+        {tabNo == 0 && (
+          <section
+            style={{
+              marginTop: "5vh",
+            }}
+          >
+            <TextField
+              label="Paste Video Call Link"
+              value={joiningLink}
+              fullWidth
+              onChange={(event) => setJoiningLink(event.target.value)}
+              variant="outlined"
+              margin="normal"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (joiningLink == "") {
+                  setInvalidJoiningLink(true);
+                } else joinRoom(joiningLink);
+              }}
+              fullWidth
+            >
+              Join Room
+            </Button>
+          </section>
+        )}
+        {tabNo == 1 && (
+          <section
+            style={{
+              marginTop: "5vh",
+            }}
+          >
+            <Typography variant="body1" align="center" gutterBottom>
+              Your Room Link : {createdLink == "" ? "None!" : createdLink}
             </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
-          </DialogActions>
-        </Dialog>
-      </section>
+            <Button
+              variant="text"
+              onClick={() =>
+                navigator.share({
+                  text: createdLink,
+                  title: "Connect with me on Video chat",
+                })
+              }
+            >
+              Share it!
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={createRoom}
+              fullWidth
+              sx={{
+                marginTop: "1.5vw",
+                // backgroundColor: "#1e88e5",
+                // "&:hover": {
+                //   backgroundColor: "#1565c0",
+                // },
+              }}
+            >
+              Create Room
+            </Button>
+            <Dialog
+              open={invalidJoiningLink}
+              onClose={() => setInvalidJoiningLink(false)}
+            >
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <Typography>
+                  Please enter a valid room link to join the call.
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
+              </DialogActions>
+            </Dialog>
+          </section>
+        )}
+      </Box>
     </Box>
   );
 

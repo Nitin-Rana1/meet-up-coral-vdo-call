@@ -1,17 +1,21 @@
 .container {
+  position: relative;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
+  min-width: 100vw;
+  min-height: 100vh;
+
   overflow: hidden;
-  display: grid;
+  background-color: #04061f;
+
   .videos {
     padding: 0;
-    // background-color: red;
     position: relative;
+    width: 100vw;
+    height: 100vh;
     .remoteVideo {
       width: 100vw;
       height: 100vh;
-      background-color: black;
+      transform: scaleX(-1);
     }
     .localVideo {
       position: absolute;
@@ -21,6 +25,17 @@
       width: 20vw;
       height: 20vh;
       background-color: none;
+      transform: scaleX(-1);
+    }
+  }
+  article {
+    position: absolute;
+    bottom: 2vh;
+    right: 0vw;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    div {
     }
   }
 }

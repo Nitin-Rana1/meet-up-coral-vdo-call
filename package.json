@@ -12,6 +12,7 @@
     "@andyet/simplewebrtc": "^1.30.5",
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
+    "@mui/icons-material": "^5.14.0",
     "@mui/material": "^5.12.3",
     "@types/node": "18.15.3",
     "@types/react": "18.0.28",
