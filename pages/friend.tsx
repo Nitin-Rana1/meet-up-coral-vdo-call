@@ -88,10 +88,6 @@ export default function Friend() {
       localStream.getTracks().forEach((track) => {
         conn.addTrack(track, localStream);
       });
-      // Add audio tracks to peer connection
-      localStream.getAudioTracks().forEach((track) => {
-        conn.addTrack(track, localStream);
-      });
       setPc(conn);
     }
     init();
