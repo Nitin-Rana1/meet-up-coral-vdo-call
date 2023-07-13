@@ -88,6 +88,10 @@ export default function Friend() {
       localStream.getTracks().forEach((track) => {
         conn.addTrack(track, localStream);
       });
+      // Add audio tracks to peer connection
+      localStream.getAudioTracks().forEach((track) => {
+        conn.addTrack(track, localStream);
+      });
       setPc(conn);
     }
     init();
@@ -190,7 +194,7 @@ export default function Friend() {
   const pauseVdo = () => {
     setVdoOn(false);
     const localStream = localVideoRef.current!.srcObject as MediaStream | null;
-    const tracks = localStream!.getTracks();
+    const tracks = localStream!.getVideoTracks();
     tracks.forEach((track) => {
       track.enabled = false;
     });
@@ -199,7 +203,7 @@ export default function Friend() {
   const resumeVdo = () => {
     setVdoOn(true);
     const localStream = localVideoRef.current!.srcObject as MediaStream | null;
-    const tracks = localStream!.getTracks();
+    const tracks = localStream!.getVideoTracks();
     tracks.forEach((track) => {
       track.enabled = true;
     });
