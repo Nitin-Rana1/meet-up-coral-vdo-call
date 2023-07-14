@@ -20,7 +20,7 @@ import {
   Tab,
   Link,
 } from "@mui/material";
-import styles from "../styles/Friend.module.scss";
+import styles from "../../styles/Friend.module.scss";
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import { db } from "../fireb/firebApp";
