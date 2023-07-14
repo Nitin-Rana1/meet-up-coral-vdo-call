@@ -261,7 +261,7 @@ export default function Stranger() {
                 onClick={resumeVdo}
               />
             )}
-            <Link href="/friend">
+            <Link href="/stranger">
               <CallEndRounded
                 sx={{
                   color: "red",
