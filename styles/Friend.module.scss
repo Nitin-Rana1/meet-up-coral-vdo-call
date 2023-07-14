@@ -20,7 +20,7 @@
     .localVideo {
       position: absolute;
       left: 0;
-      bottom: 0;
+      bottom: 5vh;
       z-index: 2;
       width: 20vw;
       height: 20vh;
@@ -30,13 +30,11 @@
   }
   article {
     position: absolute;
-    bottom: 2vh;
+    bottom: 7vh;
     right: 0vw;
     width: 100vw;
     display: flex;
     justify-content: center;
-    div {
-    }
   }
 }
 .Menu {

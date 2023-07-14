@@ -3,7 +3,6 @@ import {
   Typography,
   Button,
   TextField,
-  Drawer,
   SwipeableDrawer,
   Box,
   Divider,
@@ -49,6 +48,7 @@ import {
   MicOffRounded,
   VideocamOff,
   Videocam,
+  Share,
 } from "@mui/icons-material";
 const servers = {
   iceServers: [
@@ -65,10 +65,7 @@ export default function Friend() {
   const [pc, setPc] = useState<RTCPeerConnection | null>(null);
   const [createdLink, setCreatedLink] = useState("");
   const [joiningLink, setJoiningLink] = useState("");
-  const [bottomPopUp, setBottomPopUp] = useState(false);
-  useEffect(() => {
-    setBottomPopUp(true);
-  }, []);
+
   useEffect(() => {
     if (remoteVideoRef.current) {
       console.log("remoVdo");
@@ -273,9 +270,7 @@ export default function Friend() {
           </div>
         </article>
       </section>
-      <BottomSlider
-        bottomPopUp={bottomPopUp}
-        setBottomPopUp={setBottomPopUp}
+      <SwipeableTemporaryDrawer
         createdLink={createdLink}
         joiningLink={joiningLink}
         setJoiningLink={setJoiningLink}
@@ -287,9 +282,8 @@ export default function Friend() {
     </Container>
   );
 }
-function BottomSlider({
-  bottomPopUp,
-  setBottomPopUp,
+
+function SwipeableTemporaryDrawer({
   createdLink,
   joiningLink,
   setJoiningLink,
@@ -298,8 +292,6 @@ function BottomSlider({
   joinRoom,
   pc,
 }: {
-  bottomPopUp: boolean;
-  setBottomPopUp: (x: boolean) => void;
   createdLink: string;
   joiningLink: string;
   setJoiningLink: (x: string) => void;
@@ -308,6 +300,17 @@ function BottomSlider({
   joinRoom: (x: string) => void;
   pc: RTCPeerConnection | null;
 }) {
+  const [bottom, setBottom] = useState(true);
+
+  const [invalidJoiningLink, setInvalidJoiningLink] = useState(false);
+  const [tabNo, setTabNo] = useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabNo(newValue);
+  };
+  useEffect(() => {
+    setBottom(true);
+  }, []);
+
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       if (
@@ -319,127 +322,115 @@ function BottomSlider({
         return;
       }
 
-      setBottomPopUp(open);
+      setBottom(open);
     };
-  const [invalidJoiningLink, setInvalidJoiningLink] = useState(false);
-  const [tabNo, setTabNo] = useState(0);
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabNo(newValue);
-  };
+
   const list = () => (
     <Box
-      sx={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        width: "100%",
-        padding: "2vw",
-        borderRadius: "2vw 2vw 0 0",
-        backgroundColor: "#fff",
-        boxShadow: "0px -4px 12px rgba(0, 0, 0, 0.25)",
-        zIndex: 9999,
-      }}
+      sx={{ width: "auto", marginBottom: "2vh", padding: "2vw" }}
       role="presentation"
+      // onClick={toggleDrawer(false)}
+      // onKeyDown={toggleDrawer(false)}
     >
-      <Box sx={{ width: "100%", height: "37vh" }}>
-        <Tabs
-          value={tabNo}
-          onChange={handleChange}
-          aria-label="basic tabs example"
+      <Tabs
+        value={tabNo}
+        onChange={handleChange}
+        aria-label="basic tabs example"
+      >
+        <Tab label="Join Room" onClick={() => setTabNo(0)} />
+        <Tab label="Create Room" onClick={() => setTabNo(1)} />
+      </Tabs>
+      {tabNo == 0 && (
+        <section
+          style={{
+            marginTop: "5vh",
+            padding: "4vw",
+          }}
         >
-          <Tab label="Join Room" onClick={() => setTabNo(0)} />
-          <Tab label="Create Room" onClick={() => setTabNo(1)} />
-        </Tabs>
-        {tabNo == 0 && (
-          <section
-            style={{
-              marginTop: "5vh",
+          <TextField
+            label="Paste Video Call Link"
+            value={joiningLink}
+            fullWidth
+            onChange={(event) => setJoiningLink(event.target.value)}
+            variant="outlined"
+            margin="normal"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              if (joiningLink == "") {
+                setInvalidJoiningLink(true);
+              } else joinRoom(joiningLink);
+            }}
+            fullWidth
+          >
+            Join Room
+          </Button>
+        </section>
+      )}
+      {tabNo == 1 && (
+        <section
+          style={{
+            marginTop: "5vh",
+            padding: "4vw",
+          }}
+        >
+          <Typography variant="body1" align="center" gutterBottom>
+            Your Room Link : {createdLink == "" ? "None!" : createdLink}
+          </Typography>
+          <Button
+            variant="text"
+            onClick={() =>
+              navigator.share({
+                text: createdLink,
+                title: "Connect with me on Video chat",
+              })
+            }
+          >
+            <Share style={{ marginRight: "1vw" }} />
+            Share link!
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={createRoom}
+            fullWidth
+            sx={{
+              marginTop: "1.5vw",
+              // backgroundColor: "#1e88e5",
+              // "&:hover": {
+              //   backgroundColor: "#1565c0",
+              // },
             }}
           >
-            <TextField
-              label="Paste Video Call Link"
-              value={joiningLink}
-              fullWidth
-              onChange={(event) => setJoiningLink(event.target.value)}
-              variant="outlined"
-              margin="normal"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                if (joiningLink == "") {
-                  setInvalidJoiningLink(true);
-                } else joinRoom(joiningLink);
-              }}
-              fullWidth
-            >
-              Join Room
-            </Button>
-          </section>
-        )}
-        {tabNo == 1 && (
-          <section
-            style={{
-              marginTop: "5vh",
-            }}
+            Create Room
+          </Button>
+          <Dialog
+            open={invalidJoiningLink}
+            onClose={() => setInvalidJoiningLink(false)}
           >
-            <Typography variant="body1" align="center" gutterBottom>
-              Your Room Link : {createdLink == "" ? "None!" : createdLink}
-            </Typography>
-            <Button
-              variant="text"
-              onClick={() =>
-                navigator.share({
-                  text: createdLink,
-                  title: "Connect with me on Video chat",
-                })
-              }
-            >
-              Share it!
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={createRoom}
-              fullWidth
-              sx={{
-                marginTop: "1.5vw",
-                // backgroundColor: "#1e88e5",
-                // "&:hover": {
-                //   backgroundColor: "#1565c0",
-                // },
-              }}
-            >
-              Create Room
-            </Button>
-            <Dialog
-              open={invalidJoiningLink}
-              onClose={() => setInvalidJoiningLink(false)}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>
-                <Typography>
-                  Please enter a valid room link to join the call.
-                </Typography>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
-              </DialogActions>
-            </Dialog>
-          </section>
-        )}
-      </Box>
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Please enter a valid room link to join the call.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
+            </DialogActions>
+          </Dialog>
+        </section>
+      )}
     </Box>
   );
 
   return (
     <div>
-      <Fragment key={"bottom"}>
-        {/* <Button onClick={toggleDrawer(true)}>{"bottom"}</Button> */}
+      <Fragment>
         <SwipeableDrawer
           anchor={"bottom"}
-          open={bottomPopUp}
+          open={bottom}
           onClose={toggleDrawer(false)}
           onOpen={toggleDrawer(true)}
         >
