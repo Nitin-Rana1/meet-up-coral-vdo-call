@@ -40,3 +40,17 @@
 .Menu {
   display: flex;
 }
+.settingIcon {
+  position: absolute;
+  color: white;
+  font-size: 2em;
+  right: 2vw;
+  bottom: 10vh;
+}
+.settingIconInMenu {
+  position: absolute;
+  right: 2vw;
+  top: 3vh;
+  font-size: 2.4em;
+  color: red;
+}

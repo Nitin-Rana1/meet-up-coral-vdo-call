@@ -49,6 +49,8 @@ import {
   VideocamOff,
   Videocam,
   Share,
+  Settings,
+  Close,
 } from "@mui/icons-material";
 const servers = {
   iceServers: [
@@ -327,7 +329,12 @@ function SwipeableTemporaryDrawer({
 
   const list = () => (
     <Box
-      sx={{ width: "auto", marginBottom: "2vh", padding: "2vw" }}
+      sx={{
+        width: "auto",
+        marginBottom: "2vh",
+        padding: "2vw",
+        position: "relative",
+      }}
       role="presentation"
       // onClick={toggleDrawer(false)}
       // onKeyDown={toggleDrawer(false)}
@@ -340,6 +347,7 @@ function SwipeableTemporaryDrawer({
         <Tab label="Join Room" onClick={() => setTabNo(0)} />
         <Tab label="Create Room" onClick={() => setTabNo(1)} />
       </Tabs>
+      <Close className={styles.settingIconInMenu} onClick={settingClick} />
       {tabNo == 0 && (
         <section
           style={{
@@ -383,7 +391,7 @@ function SwipeableTemporaryDrawer({
             variant="text"
             onClick={() =>
               navigator.share({
-                text: createdLink,
+                text: "https://meet-up-coral.vercel.app/friend/" + createdLink,
                 title: "Connect with me on Video chat",
               })
             }
@@ -424,9 +432,14 @@ function SwipeableTemporaryDrawer({
       )}
     </Box>
   );
-
+  function settingClick() {
+    setBottom((prevValue) => !prevValue);
+  }
   return (
     <div>
+      <div>
+        <Settings className={styles.settingIcon} onClick={settingClick} />
+      </div>
       <Fragment>
         <SwipeableDrawer
           anchor={"bottom"}
