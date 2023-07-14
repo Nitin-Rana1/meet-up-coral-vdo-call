@@ -242,12 +242,12 @@ export default function Friend() {
             {myMicMuted ? (
               <Mic
                 sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
-                onClick={() => setMyMicMuted(!myMicMuted)}
+                onClick={resumeMyAudio}
               />
             ) : (
               <MicOffRounded
                 sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
-                onClick={() => setMyMicMuted(!myMicMuted)}
+                onClick={pauseMyAudio}
               />
             )}
             {vdoOn ? (
