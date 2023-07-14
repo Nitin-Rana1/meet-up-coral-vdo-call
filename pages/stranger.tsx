@@ -38,6 +38,7 @@ import {
   getDoc,
   DocumentReference,
   DocumentData,
+  orderBy,
   serverTimestamp,
 } from "firebase/firestore";
 import { list } from "firebase/storage";
@@ -52,6 +53,7 @@ import {
   Share,
   Settings,
   Close,
+  Search,
 } from "@mui/icons-material";
 const servers = {
   iceServers: [
@@ -61,7 +63,7 @@ const servers = {
   ],
   iceCandidatePoolSize: 10,
 };
-export default function Friend() {
+export default function Stranger() {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -114,7 +116,7 @@ export default function Friend() {
       type: offerDescription.type,
     };
     // Reference Firestore collections for signaling
-    const callDoc = await addDoc(collection(db, "calls"), {
+    const callDoc = await addDoc(collection(db, "strangersCalls"), {
       offer,
       answer: null,
       createdAt: serverTimestamp(),
@@ -122,7 +124,6 @@ export default function Friend() {
     setCreatedLink(callDoc.id);
     //offercandidates
     const offerCandidates = collection(callDoc, "offerCandidates");
-    const oc = collection(callDoc, "TOP G");
 
     // Get candidates for caller, save to db
     pc!.onicecandidate = (event) => {
@@ -156,7 +157,7 @@ export default function Friend() {
   }
   async function joinRoom(id: string) {
     console.log("joining room");
-    const callDoc = doc(db, "calls", id);
+    const callDoc = doc(db, "strangersCalls", id);
     const offerCandidates = collection(callDoc, "offerCandidates");
     const answerCandidates = collection(callDoc, "answerCandidates");
     pc!.onicecandidate = (event) => {
@@ -196,7 +197,6 @@ export default function Friend() {
       track.enabled = false;
     });
   };
-
   const resumeVdo = () => {
     setVdoOn(true);
     const localStream = localVideoRef.current!.srcObject as MediaStream | null;
@@ -205,7 +205,6 @@ export default function Friend() {
       track.enabled = true;
     });
   };
-
   const pauseMyAudio = () => {
     setMyMicMuted(true);
     const localStream = localVideoRef.current!.srcObject as MediaStream | null;
@@ -307,10 +306,7 @@ function SwipeableTemporaryDrawer({
   const [bottom, setBottom] = useState(true);
 
   const [invalidJoiningLink, setInvalidJoiningLink] = useState(false);
-  const [tabNo, setTabNo] = useState(0);
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabNo(newValue);
-  };
+
   useEffect(() => {
     setBottom(true);
   }, []);
@@ -328,7 +324,35 @@ function SwipeableTemporaryDrawer({
 
       setBottom(open);
     };
+  async function Search() {
+    const callsRef = collection(db, "strangersCalls");
 
+    // Create the query
+    const q = query(
+      callsRef,
+      where("answer", "==", null),
+      orderBy("createdAt"),
+      limit(1)
+    );
+
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        // Retrieve the first document in the query result
+        const documentSnapshot = querySnapshot.docs[0];
+        const data = documentSnapshot.data();
+        const documentId = documentSnapshot.id;
+
+        console.log("Document ID:", documentId);
+        console.log("Document Data:", data);
+        joinRoom(documentId);
+      } else {
+        createRoom();
+      }
+    } catch (error) {
+      console.error("Error querying strangersCalls collection:", error);
+    }
+  }
   const list = () => (
     <Box
       sx={{
@@ -341,97 +365,17 @@ function SwipeableTemporaryDrawer({
       // onClick={toggleDrawer(false)}
       // onKeyDown={toggleDrawer(false)}
     >
-      <Tabs
-        value={tabNo}
-        onChange={handleChange}
-        aria-label="basic tabs example"
-      >
-        <Tab label="Join Room" onClick={() => setTabNo(0)} />
-        <Tab label="Create Room" onClick={() => setTabNo(1)} />
-      </Tabs>
       <Close className={styles.settingIconInMenu} onClick={settingClick} />
-      {tabNo == 0 && (
-        <section
-          style={{
-            marginTop: "5vh",
-            padding: "4vw",
-          }}
-        >
-          <TextField
-            label="Paste Video Call Link"
-            value={joiningLink}
-            fullWidth
-            onChange={(event) => setJoiningLink(event.target.value)}
-            variant="outlined"
-            margin="normal"
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              if (joiningLink == "") {
-                setInvalidJoiningLink(true);
-              } else joinRoom(joiningLink);
-            }}
-            fullWidth
-          >
-            Join Room
-          </Button>
-        </section>
-      )}
-      {tabNo == 1 && (
-        <section
-          style={{
-            marginTop: "5vh",
-            padding: "4vw",
-          }}
-        >
-          <Typography variant="body1" align="center" gutterBottom>
-            Your Room Link : {createdLink == "" ? "None!" : createdLink}
-          </Typography>
-          <Button
-            variant="text"
-            onClick={() =>
-              navigator.share({
-                text: "https://meet-up-coral.vercel.app/friend/" + createdLink,
-                title: "Connect with me on Video chat",
-              })
-            }
-          >
-            <Share style={{ marginRight: "1vw" }} />
-            Share link!
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={createRoom}
-            fullWidth
-            sx={{
-              marginTop: "1.5vw",
-              // backgroundColor: "#1e88e5",
-              // "&:hover": {
-              //   backgroundColor: "#1565c0",
-              // },
-            }}
-          >
-            Create Room
-          </Button>
-          <Dialog
-            open={invalidJoiningLink}
-            onClose={() => setInvalidJoiningLink(false)}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <Typography>
-                Please enter a valid room link to join the call.
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setInvalidJoiningLink(false)}>OK</Button>
-            </DialogActions>
-          </Dialog>
-        </section>
-      )}
+      <section
+        style={{
+          marginTop: "5vh",
+          padding: "4vw 7vw",
+        }}
+      >
+        <Button variant="contained" color="primary" onClick={Search} fullWidth>
+          Search for people
+        </Button>
+      </section>
     </Box>
   );
   function settingClick() {
