@@ -69,6 +69,9 @@ export default function Friend() {
   const [createdLink, setCreatedLink] = useState("");
   const [joiningLink, setJoiningLink] = useState("");
 
+  const [myMicMuted, setMyMicMuted] = useState(true);
+  const [vdoOn, setVdoOn] = useState(true);
+  
   useEffect(() => {
     if (remoteVideoRef.current) {
       console.log("remoVdo");
@@ -80,7 +83,7 @@ export default function Friend() {
       const conn = new RTCPeerConnection(servers);
       const localStream = await navigator.mediaDevices?.getUserMedia({
         video: true,
-        audio: true,
+        audio: false,
       });
       localVideoRef.current!.srcObject = localStream;
       setRemoteStream(new MediaStream());
@@ -186,8 +189,7 @@ export default function Friend() {
       });
     });
   }
-  const [myMicMuted, setMyMicMuted] = useState(false);
-  const [vdoOn, setVdoOn] = useState(true);
+
   const pauseVdo = () => {
     setVdoOn(false);
     const localStream = localVideoRef.current!.srcObject as MediaStream | null;
@@ -241,24 +243,24 @@ export default function Friend() {
         <article>
           <div>
             {myMicMuted ? (
-              <Mic
-                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+              <MicOffRounded
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
                 onClick={resumeMyAudio}
               />
             ) : (
-              <MicOffRounded
-                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+              <Mic
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
                 onClick={pauseMyAudio}
               />
             )}
             {vdoOn ? (
-              <VideocamOff
-                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+              <Videocam
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
                 onClick={pauseVdo}
               />
             ) : (
-              <Videocam
-                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+              <VideocamOff
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
                 onClick={resumeVdo}
               />
             )}
