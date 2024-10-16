@@ -83,7 +83,7 @@ export default function JoinFriend() {
       const conn = new RTCPeerConnection(servers);
       const localStream = await navigator.mediaDevices?.getUserMedia({
         video: true,
-        audio: true,
+        audio: false,
       });
       localVideoRef.current!.srcObject = localStream;
       setRemoteStream(new MediaStream());
@@ -188,7 +188,7 @@ export default function JoinFriend() {
       });
     });
   }
-  const [myMicMuted, setMyMicMuted] = useState(false);
+  const [myMicMuted, setMyMicMuted] = useState(true);
   const [vdoOn, setVdoOn] = useState(true);
   const pauseVdo = () => {
     setVdoOn(false);
@@ -244,24 +244,24 @@ export default function JoinFriend() {
         <article>
           <div>
             {myMicMuted ? (
-              <Mic
-                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+              <MicOffRounded
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
                 onClick={resumeMyAudio}
               />
             ) : (
-              <MicOffRounded
-                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+              <Mic
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
                 onClick={pauseMyAudio}
               />
             )}
             {vdoOn ? (
-              <VideocamOff
-                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
+              <Videocam
+                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
                 onClick={pauseVdo}
               />
             ) : (
-              <Videocam
-                sx={{ color: "#31c5f1", fontSize: 50, marginRight: "3vw" }}
+              <VideocamOff
+                sx={{ color: "red", fontSize: 50, marginRight: "3vw" }}
                 onClick={resumeVdo}
               />
             )}
